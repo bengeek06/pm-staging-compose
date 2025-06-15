@@ -24,13 +24,27 @@ This repository provides the complete development environment for the NexiPM sof
     ```
 
 3. **Access the main services:**
-    - **NexiPM backend(s):** http://localhost:8000 (or other ports as configured)
-    - **Swagger UI:** http://localhost:8081
-    - **pgAdmin:** http://localhost:5050 (default login: `admin@admin.com` / `admin`)
-    - **Grafana:** http://localhost:3000 (default login: `admin` / `admin`)
-    - **Prometheus:** http://localhost:9090
-    - **MinIO Console:** http://localhost:9001 (`minioadmin` / `minioadmin`)
-    - **Redis:** localhost:6379
+
+| Service             | URL / Port                      | Notes                                      |
+|---------------------|---------------------------------|--------------------------------------------|
+| NexiPM Frontend     | http://localhost:3000           | Next.js frontend                           |
+| Companies API       | http://localhost:5002           | Flask API                                  |
+| Auth API            | http://localhost:5000           | Flask API                                  |
+| Users API           | http://localhost:5001           | Flask API                                  |
+| Companies DB        | localhost:5434                  | PostgreSQL                                 |
+| Auth DB             | localhost:5433                  | PostgreSQL                                 |
+| Users DB            | localhost:5432                  | PostgreSQL                                 |
+| pgAdmin             | http://localhost:5050           | login: `admin@admin.com` / `admin`         |
+| Swagger UI          | http://localhost:8081           | API documentation                          |
+| Grafana             | http://localhost:3200           | login: `admin` / `admin`                   |
+| Prometheus          | http://localhost:9090           |                                            |
+| Redis               | localhost:6379                  |                                            |
+| MinIO Console       | http://localhost:9001           | login: `minioadmin` / `minioadmin`         |
+| MinIO S3 API        | http://localhost:9000           | S3-compatible API                          |
+| Loki (logs)         | http://localhost:3100           | Grafana Loki log aggregation               |
+| Promtail            | N/A                             | Log shipper for Loki                       |
+| Node Exporter       | http://localhost:9100           | Prometheus system metrics                  |
+| cAdvisor            | http://localhost:8180           | Prometheus container metrics               |
 
 4. **Stop the environment:**
     ```bash

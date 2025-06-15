@@ -1,24 +1,72 @@
 
 services:
 
-  user_service:
-    build: ./user_service
-    env_file: ./user_service/.env.staging
+  nexi-pm:
+    build: ./pm-front
+    env_file: ./pm-front/.env.development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - companies_service
+      - auth_service
+      - users_service
+
+  companies_service:
+    build: ./pm-companies-api
+    env_file: ./pm-companies-api/.env.staging
+    ports:
+      - "5002:5000"
+    depends_on:
+      - companies_db
+
+  companies_db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: companies
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: companies_staging
+    ports:
+      - "5434:5432"
+    volumes:
+      - companies_db_data:/var/lib/postgresql/data
+  
+  auth_service:
+    build: ./pm-auth-api
+    env_file: ./pm-auth-api/.env.staging
+    ports:
+      - "5000:5000"
+    depends_on:
+      - auth_db
+
+  auth_db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: auth_staging
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+  
+  users_service:
+    build: ./pm-users-api
+    env_file: ./pm-users-api/.env.staging
     ports:
       - "5001:5000"
     depends_on:
-      - user_db
+      - users_db
 
-  user_db:
+  users_db:
     image: postgres:16
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: users
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: user_db
+      POSTGRES_DB: users_staging
     ports:
       - "5432:5432"
     volumes:
-      - user_db_data:/var/lib/postgresql/data
+      - users_db_data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -28,32 +76,43 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - pgsql
+      - users_db
+      - companies_db
+      - auth_db
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
   swagger-ui:
     image: swaggerapi/swagger-ui
     environment:
-      SWAGGER_JSON: /openapi/openapi.yml
+      URLS: |
+        [
+          {"url": "/openapi/pm-auth-api.yml", "name": "PM Auth API"},
+          {"url": "/openapi/pm-companies-api.yml", "name": "PM Companies API"},
+          {"url": "/openapi/pm-users-api.yml", "name": "PM Users API"}
+        ]
     volumes:
-      - ./backend/openapi.yml:/openapi/openapi.yml
+      - ./pm-auth-api/openapi.yml:/usr/share/nginx/html/openapi/pm-auth-api.yml
+      - ./pm-companies-api/openapi.yml:/usr/share/nginx/html/openapi/pm-companies-api.yml
+      - ./pm-users-api/openapi.yml:/usr/share/nginx/html/openapi/pm-users-api.yml
     ports:
       - "8081:8080"
 
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "3200:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
-      - pgsql
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
 
   prometheus:
     image: prom/prometheus:latest
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 
@@ -70,11 +129,50 @@ services:
     command: server /data --console-address ":9001"
     ports:
       - "9001:9001"  # Console web
-      - "9002:9000"  # API S3 (remappé pour éviter conflit avec sentry)
+      - "9000:9000"  # API S3
     volumes:
       - minio_data:/data
 
+  loki:
+    image: grafana/loki:2.9.4
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    volumes:
+      - /var/log:/var/log
+      - ./conf/promtail-config.yaml:/etc/promtail/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - "8180:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+
 volumes:
-  user_db_data:
+  companies_db_data:
+  users_db_data:
+  auth_db_data:
   pgadmin_data:
   minio_data:
+  grafana_data:
+  loki_data:

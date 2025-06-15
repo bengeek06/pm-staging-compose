@@ -1,3 +1,12 @@
-[submodule "backend"]
-	path = backend
-	url = git@github.com:bengeek06/flask_api_template.git
+[submodule "front_service"]
+	path = pm-front
+    url = git@github.com:bengeek06/pm-front.git
+[submodule "auth-service"]
+    path = pm-auth-api
+    url = git@github.com:bengeek06/pm-auth-api.git
+[submodule "users_service"]
+    path = pm-users-api
+    url = git@github.com:bengeek06/pm-users-api.git
+[submodule "companies_service"]
+    path = pm-companies-api
+    url = git@github.com:bengeek06/pm-companies-api.git

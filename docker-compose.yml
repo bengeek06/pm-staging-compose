@@ -1,15 +1,24 @@
 
 services:
-  pgsql:
+
+  user_service:
+    build: ./user_service
+    env_file: ./user_service/.env.staging
+    ports:
+      - "5001:5000"
+    depends_on:
+      - user_db
+
+  user_db:
     image: postgres:16
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
+      POSTGRES_DB: user_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - user_db_data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -22,18 +31,6 @@ services:
       - pgsql
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-
-  backend:
-    build: ./backend
-    environment:
-      DATABASE_URL: postgres://user:password@pgsql:5432/mydb
-      # Ajoute ici d'autres variables nécessaires à ton backend
-    depends_on:
-      - pgsql
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
 
   swagger-ui:
     image: swaggerapi/swagger-ui
@@ -60,54 +57,6 @@ services:
     ports:
       - "9090:9090"
 
-  node-exporter:
-    image: prom/node-exporter:latest
-    ports:
-      - "9100:9100"
-
-  
-  sentry:
-    image: sentry:latest
-    links:
-    - redis
-    - pgsql
-    ports:
-    - 9000:9000
-    stdin_open: true
-    tty: true
-    environment:
-      SENTRY_SECRET_KEY: 'your_secret_key'
-      SENTRY_POSTGRES_HOST: pgsql
-      SENTRY_DB_USER: user
-      SENTRY_DB_PASSWORD: password
-      SENTRY_REDIS_HOST: redis
-
-  sentry-cron:
-    image: sentry:latest
-    links:
-    - redis
-    - pgsql
-    command: "sentry run cron"
-    environment:
-      SENTRY_SECRET_KEY: 'your_secret_key'
-      SENTRY_POSTGRES_HOST: pgsql
-      SENTRY_DB_USER: user
-      SENTRY_DB_PASSWORD: password
-      SENTRY_REDIS_HOST: redis
-
-  sentry-worker:
-    image: sentry:latest
-    links:
-    - redis
-    - pgsql
-    command: "sentry run worker"
-    environment:
-        SENTRY_SECRET_KEY: 'your_secret_key'
-        SENTRY_POSTGRES_HOST: pgsql
-        SENTRY_DB_USER: user
-        SENTRY_DB_PASSWORD: password
-        SENTRY_REDIS_HOST: redis
-
   redis:
     image: redis:latest
     ports:
@@ -126,6 +75,6 @@ services:
       - minio_data:/data
 
 volumes:
-  pgdata:
+  user_db_data:
   pgadmin_data:
   minio_data:

@@ -11,24 +11,24 @@ services:
       - auth_service
       - users_service
 
-  companies_service:
-    build: ./pm-companies-api
-    env_file: ./pm-companies-api/.env.staging
-    ports:
-      - "5002:5000"
-    depends_on:
-      - companies_db
+#  companies_service:
+#    build: ./pm-companies-api
+#    env_file: ./pm-companies-api/.env.staging
+#    ports:
+#      - "5002:5000"
+#    depends_on:
+#      - companies_db
 
-  companies_db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: companies
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: companies_staging
-    ports:
-      - "5434:5432"
-    volumes:
-      - companies_db_data:/var/lib/postgresql/data
+#  companies_db:
+#    image: postgres:16
+#    environment:
+#      POSTGRES_USER: companies
+#      POSTGRES_PASSWORD: password
+#      POSTGRES_DB: companies_staging
+#    ports:
+#      - "5434:5432"
+#    volumes:
+#      - companies_db_data:/var/lib/postgresql/data
   
   auth_service:
     build: ./pm-auth-api
@@ -49,24 +49,24 @@ services:
     volumes:
       - auth_db_data:/var/lib/postgresql/data
   
-  users_service:
-    build: ./pm-users-api
-    env_file: ./pm-users-api/.env.staging
-    ports:
-      - "5001:5000"
-    depends_on:
-      - users_db
+#  users_service:
+#    build: ./pm-users-api
+#    env_file: ./pm-users-api/.env.staging
+#    ports:
+#      - "5001:5000"
+#    depends_on:
+#      - users_db
 
-  users_db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: users
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: users_staging
-    ports:
-      - "5432:5432"
-    volumes:
-      - users_db_data:/var/lib/postgresql/data
+#  users_db:
+#    image: postgres:16
+#    environment:
+#      POSTGRES_USER: users
+#      POSTGRES_PASSWORD: password
+#      POSTGRES_DB: users_staging
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - users_db_data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:latest

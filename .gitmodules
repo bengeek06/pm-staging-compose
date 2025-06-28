@@ -4,9 +4,6 @@
 [submodule "pm-auth-api"]
 	path = pm-auth-api
 	url = git@github.com:bengeek06/pm-auth-api.git
-[submodule "pm-users-api"]
-	path = pm-users-api
-	url = git@github.com:bengeek06/pm-users-api.git
-[submodule "pm-companies-api"]
-	path = pm-companies-api
-	url = git@github.com:bengeek06/pm-companies-api.git
+[submodule "pm-identity-api"]
+	path = pm-identity-api
+	url = git@github.com:bengeek06/pm-identity-api.git

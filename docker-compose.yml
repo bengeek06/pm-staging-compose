@@ -1,4 +1,3 @@
-
 services:
 
   nexi-pm:
@@ -7,28 +6,30 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - companies_service
+      - identity_service
       - auth_service
-      - users_service
 
-#  companies_service:
-#    build: ./pm-companies-api
-#    env_file: ./pm-companies-api/.env.staging
-#    ports:
-#      - "5002:5000"
-#    depends_on:
-#      - companies_db
 
-#  companies_db:
-#    image: postgres:16
-#    environment:
-#      POSTGRES_USER: companies
-#      POSTGRES_PASSWORD: password
-#      POSTGRES_DB: companies_staging
-#    ports:
-#      - "5434:5432"
-#    volumes:
-#      - companies_db_data:/var/lib/postgresql/data
+  identity_service:
+    build: ./pm-identity-api
+    env_file: ./pm-identity-api/.env.staging
+    ports:
+      - "5002:5000"
+    depends_on:
+      - identity_db
+    volumes:
+      - ./pm-identity-api:/app
+
+  identity_db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: identity
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: identity_staging
+    ports:
+      - "5434:5432"
+    volumes:
+      - identity_db_data:/var/lib/postgresql/data
   
   auth_service:
     build: ./pm-auth-api
@@ -37,6 +38,8 @@ services:
       - "5000:5000"
     depends_on:
       - auth_db
+    volumes:
+      - ./pm-auth-api:/app
 
   auth_db:
     image: postgres:16
@@ -49,25 +52,6 @@ services:
     volumes:
       - auth_db_data:/var/lib/postgresql/data
   
-#  users_service:
-#    build: ./pm-users-api
-#    env_file: ./pm-users-api/.env.staging
-#    ports:
-#      - "5001:5000"
-#    depends_on:
-#      - users_db
-
-#  users_db:
-#    image: postgres:16
-#    environment:
-#      POSTGRES_USER: users
-#      POSTGRES_PASSWORD: password
-#      POSTGRES_DB: users_staging
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - users_db_data:/var/lib/postgresql/data
-
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -76,8 +60,7 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - users_db
-      - companies_db
+      - identity_db
       - auth_db
     volumes:
       - pgadmin_data:/var/lib/pgadmin
@@ -88,13 +71,11 @@ services:
       URLS: |
         [
           {"url": "/openapi/pm-auth-api.yml", "name": "PM Auth API"},
-          {"url": "/openapi/pm-companies-api.yml", "name": "PM Companies API"},
-          {"url": "/openapi/pm-users-api.yml", "name": "PM Users API"}
+          {"url": "/openapi/pm-identity-api.yml", "name": "PM Identity API"},
         ]
     volumes:
       - ./pm-auth-api/openapi.yml:/usr/share/nginx/html/openapi/pm-auth-api.yml
-      - ./pm-companies-api/openapi.yml:/usr/share/nginx/html/openapi/pm-companies-api.yml
-      - ./pm-users-api/openapi.yml:/usr/share/nginx/html/openapi/pm-users-api.yml
+      - ./pm-identity-api/openapi.yml:/usr/share/nginx/html/openapi/pm-identity-api.yml
     ports:
       - "8081:8080"
 
@@ -169,8 +150,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  companies_db_data:
-  users_db_data:
+  identity_db_data:
   auth_db_data:
   pgadmin_data:
   minio_data:

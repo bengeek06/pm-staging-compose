@@ -13,38 +13,31 @@ This repository provides the complete development environment for the NexiPM sof
 
 1. **Clone this repository with submodules:**
     ```bash
-    git clone git@github.com:bengeek06/pm-staging.git
+    git clone --recurse-submodules git@github.com:bengeek06/pm-staging.git
     cd pm-staging
-    git submodule update --init --recursive
     ```
 
 2. **Build and start the environment with Docker Compose:**
     ```bash
-    docker compose up --build
+    docker compose up -d --build
+    # For the Next.js frontend, install the dependencies inside the container:
+    docker compose exec nexi-pm npm install
     ```
+    > **Note :** This command is required on first launch or if you remove the `nexi_pm_node_modules`
 
 3. **Access the main services:**
 
-| Service             | URL / Port                      | Notes                                      |
-|---------------------|---------------------------------|--------------------------------------------|
-| NexiPM Frontend     | http://localhost:3000           | Next.js frontend                           |
-| Companies API       | http://localhost:5002           | Flask API                                  |
-| Auth API            | http://localhost:5000           | Flask API                                  |
-| Users API           | http://localhost:5001           | Flask API                                  |
-| Companies DB        | localhost:5434                  | PostgreSQL                                 |
-| Auth DB             | localhost:5433                  | PostgreSQL                                 |
-| Users DB            | localhost:5432                  | PostgreSQL                                 |
-| pgAdmin             | http://localhost:5050           | login: `admin@admin.com` / `admin`         |
-| Swagger UI          | http://localhost:8081           | API documentation                          |
-| Grafana             | http://localhost:3200           | login: `admin` / `admin`                   |
-| Prometheus          | http://localhost:9090           |                                            |
-| Redis               | localhost:6379                  |                                            |
-| MinIO Console       | http://localhost:9001           | login: `minioadmin` / `minioadmin`         |
-| MinIO S3 API        | http://localhost:9000           | S3-compatible API                          |
-| Loki (logs)         | http://localhost:3100           | Grafana Loki log aggregation               |
-| Promtail            | N/A                             | Log shipper for Loki                       |
-| Node Exporter       | http://localhost:9100           | Prometheus system metrics                  |
-| cAdvisor            | http://localhost:8180           | Prometheus container metrics               |
+| Service         | URL / Port                | Notes                                  |
+|-----------------|--------------------------|----------------------------------------|
+| NexiPM Frontend | http://localhost:3000     | Next.js frontend                       |
+| Identity API    | http://localhost:5002     | Flask API                              |
+| Auth API        | http://localhost:5001     | Flask API                              |
+| Identity DB     | localhost:5434            | PostgreSQL                             |
+| Auth DB         | localhost:5433            | PostgreSQL                             |
+| pgAdmin         | http://localhost:5050     | login: `admin@admin.com` / `admin`     |
+| Swagger UI      | http://localhost:8081     | API documentation (multi-OpenAPI)      |
+
+*Other services (Grafana, Prometheus, Redis, MinIO, Loki, etc.) are present in the compose file but commented out by default. Uncomment them if you need monitoring, logging, or additional functionality.*
 
 4. **Stop the environment:**
     ```bash

@@ -1,12 +1,9 @@
-[submodule "front_service"]
+[submodule "pm-front"]
 	path = pm-front
-    url = git@github.com:bengeek06/pm-front.git
-[submodule "auth-service"]
-    path = pm-auth-api
-    url = git@github.com:bengeek06/pm-auth-api.git
-[submodule "users_service"]
-    path = pm-users-api
-    url = git@github.com:bengeek06/pm-users-api.git
-[submodule "companies_service"]
-    path = pm-companies-api
-    url = git@github.com:bengeek06/pm-companies-api.git
+	url = git@github.com:bengeek06/pm-front.git
+[submodule "pm-auth-api"]
+	path = pm-auth-api
+	url = git@github.com:bengeek06/pm-auth-api.git
+[submodule "pm-identity-api"]
+	path = pm-identity-api
+	url = git@github.com:bengeek06/pm-identity-api.git

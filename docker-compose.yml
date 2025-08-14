@@ -19,11 +19,12 @@ services:
     ports:
       - "5002:5000"
     depends_on:
-      - identity_db
+      - identity-db
+      - guardian_service
     volumes:
       - ./pm-identity-api:/app
 
-  identity_db:
+  identity-db:
     image: postgres:16
     environment:
       POSTGRES_USER: identity
@@ -40,11 +41,11 @@ services:
     ports:
       - "5001:5000"
     depends_on:
-      - auth_db
+      - auth-db
     volumes:
       - ./pm-auth-api:/app
 
-  auth_db:
+  auth-db:
     image: postgres:16
     environment:
       POSTGRES_USER: auth
@@ -55,6 +56,28 @@ services:
     volumes:
       - auth_db_data:/var/lib/postgresql/data
   
+  guardian_service:
+    build: ./pm-guardian-api
+    env_file: ./pm-guardian-api/.env.staging
+    ports:
+      - "5003:5000"
+    depends_on:
+      - guardian-db
+    volumes:
+      - ./pm-guardian-api:/app
+
+  guardian-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: guardian
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: guardian_staging
+    ports:
+      - "5435:5432"
+    volumes:
+      - guardian_db_data:/var/lib/postgresql/data
+
+
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -63,8 +86,9 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - identity_db
-      - auth_db
+      - identity-db
+      - auth-db
+      - guardian-db
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
@@ -75,30 +99,32 @@ services:
         [
           {"url": "/openapi/pm-auth-api.yml", "name": "PM Auth API"},
           {"url": "/openapi/pm-identity-api.yml", "name": "PM Identity API"},
+          {"url": "/openapi/pm-guardian-api.yml", "name": "PM Guardian API"},
         ]
     volumes:
       - ./pm-auth-api/openapi.yml:/usr/share/nginx/html/openapi/pm-auth-api.yml
       - ./pm-identity-api/openapi.yml:/usr/share/nginx/html/openapi/pm-identity-api.yml
+      - ./pm-guardian-api/openapi.yml:/usr/share/nginx/html/openapi/pm-guardian-api.yml
     ports:
       - "8081:8080"
 
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3200:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - prometheus
-    volumes:
-      - grafana_data:/var/lib/grafana
+  #grafana:
+  #  image: grafana/grafana:latest
+  #  ports:
+  #    - "3200:3000"
+  #  environment:
+  #    - GF_SECURITY_ADMIN_PASSWORD=admin
+  #  depends_on:
+  #    - prometheus
+  #  volumes:
+  #    - grafana_data:/var/lib/grafana
 
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+  #prometheus:
+  #  image: prom/prometheus:latest
+  #  volumes:
+  #    - ./conf/prometheus.yml:/etc/prometheus/prometheus.yml
+  #  ports:
+  #    - "9090:9090"
 
 #  redis:
 #    image: redis:latest
@@ -117,25 +143,25 @@ services:
 #    volumes:
 #      - minio_data:/data
 
-  loki:
-    image: grafana/loki:3.4.1
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/loki-config.yaml
-    volumes:
-      - loki_data:/loki
-      - ./conf/loki-config.yaml:/etc/loki/loki-config.yaml
+  #loki:
+  #  image: grafana/loki:3.4.1
+  #  ports:
+  #    - "3100:3100"
+  #  command: -config.file=/etc/loki/loki-config.yaml
+  #  volumes:
+  #    - loki_data:/loki
+  #    - ./conf/loki-config.yaml:/etc/loki/loki-config.yaml
 
-  promtail:
-    image: grafana/promtail:3.4.1
-    volumes:
-      - /var/log:/var/log
-      - ./conf/promtail-config.yaml:/etc/promtail/config.yaml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: -config.file=/etc/promtail/config.yaml
-    depends_on:
-      - loki
+#  promtail:
+#    image: grafana/promtail:3.4.1
+#    volumes:
+#      - /var/log:/var/log
+#      - ./conf/promtail-config.yaml:/etc/promtail/config.yaml
+#      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#    command: -config.file=/etc/promtail/config.yaml
+#    depends_on:
+#      - loki
 
 #  node-exporter:
 #    image: prom/node-exporter:latest
@@ -160,5 +186,6 @@ volumes:
   pgadmin_data:
   nexi_pm_node_modules:
 #  minio_data:
-  grafana_data:
-  loki_data:
+#  grafana_data:
+#  loki_data:
+  guardian_db_data:

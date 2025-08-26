@@ -1,16 +1,16 @@
 services:
 
-  nexi-pm:
-    build: ./pm-front
-    env_file: ./pm-front/.env.development
-    ports:
-      - "3000:3000"
-    depends_on:
-      - identity_service
-      - auth_service
-    volumes:
-      - ./pm-front:/app
-      - nexi_pm_node_modules:/app/node_modules
+#  nexi-pm:
+#    build: ./pm-front
+#    env_file: ./pm-front/.env.development
+#    ports:
+#      - "3000:3000"
+#    depends_on:
+#      - identity_service
+#      - auth_service
+#    volumes:
+#      - ./pm-front:/app
+#      - nexi_pm_node_modules:/app/node_modules
 
 
   identity_service:
